@@ -1,61 +1,538 @@
-<!DOCTYPE html>
-<html lang="ru" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Галерея | GULUM</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background-color: #050505;
-            color: #F3E5AB;
-            overflow-x: hidden;
-        }
-        /* Gold scrollbar */
-        ::-webkit-scrollbar { width: 4px; background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #D4AF37; }
-        
-        /* Gallery hover effects */
-        .gallery-item {
-            overflow: hidden;
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            transition: all 0.5s ease;
-        }
-        .gallery-item:hover {
-            border-color: #D4AF37;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
-        }
-        .gallery-item img {
-            transition: transform 0.7s ease;
-        }
-        .gallery-item:hover img {
-            transform: scale(1.1);
-        }
-    </style>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Geist:wght@300;400;500&display=swap">
+<html lang="ru" class="scroll-smooth"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GULUM | Портфолио Коллекций</title>
+<meta name="description" content="Gulum – Галерея коллекций. Вечерние платья, блузы, casual.">
+
+<!-- Fonts Optimization: Preconnect & Load only used fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+/* Custom Scrollbar - Gold */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    background: #050505;
+}
+::-webkit-scrollbar-thumb {
+    background: #D4AF37;
+    border-radius: 0px;
+}
+body {
+    background-color: #050505;
+    color: #F3E5AB;
+    overflow-x: hidden;
+}
+::selection {
+    background: #D4AF37;
+    color: #000000;
+}
+/* Noise Texture */
+.noise-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 30;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+}
+.fade-in-section {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 1.2s ease-out, transform 1.2s ease-out;
+}
+.fade-in-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+}
+.nav-dot.active {
+    background-color: #D4AF37;
+    border-color: #D4AF37;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+.img-gold-filter {
+    filter: sepia(50%) hue-rotate(5deg) saturate(90%) contrast(110%) brightness(0.9);
+    transition: filter 0.7s ease, transform 0.7s ease;
+}
+.img-container:hover .img-gold-filter {
+    filter: sepia(0%) hue-rotate(0deg) saturate(100%) contrast(100%) brightness(1);
+    transform: scale(1.03);
+}
+.gallery-scroll {
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* PRELOADER STYLES */
+#preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background-color: #050505;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 1s ease-in-out, pointer-events 0s 1s;
+}
+#preloader-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    transition: all 1.2s cubic-bezier(0.76, 0, 0.24, 1);
+    font-size: 4rem; /* Start Big */
+    letter-spacing: 0.2em;
+    white-space: nowrap;
+}
+@media (min-width: 768px) {
+    #preloader-text { font-size: 7rem; }
+}
+
+/* Loaded State */
+body.loaded #preloader {
+    background-color: transparent;
+    pointer-events: none;
+}
+body.loaded #preloader-text {
+    top: 2.5rem; /* Match header height h-20 center approx */
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.35); /* Scale down to approx 2xl */
+    color: #D4AF37;
+}
+/* Hide actual header text initially to avoid double logo */
+header h1 {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+body.loaded-complete header h1 {
+    opacity: 1;
+}
+body.loaded-complete #preloader {
+    display: none;
+}
+</style>
 </head>
-<body class="antialiased min-h-screen relative">
-    <!-- Header -->
-    <header class="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-[#D4AF37]/20">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="/" class="font-serif text-2xl text-[#D4AF37] tracking-wide">GULUM</a>
-            <a href="/" class="text-[#D4AF37] text-sm uppercase tracking-widest hover:text-[#F3E5AB] transition-colors">← Назад</a>
-        </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="pt-24 pb-16 px-6">
-        <div class="max-w-7xl mx-auto">
-            <!-- Title -->
-            <div class="text-center mb-16">
-                <h1 class="font-serif text-5xl md:text-7xl mb-4 text-[#F3E5AB]">
-                    <span class="italic text-[#D4AF37]">Галерея</span> Работ
-                </h1>
-                <p class="text-[#D4AF37]/60 text-sm uppercase tracking-widest">Наши лучшие проекты</p>
+<body class="antialiased min-h-screen relative font-[Manrope] selection:bg-[#D4AF37] selection:text-black overflow-hidden">
+
+<!-- PRELOADER -->
+<div id="preloader">
+    <div id="preloader-text" class="uppercase font-light text-[#D4AF37] font-[Playfair_Display]">Gulum</div>
+</div>
+
+<!-- Aura Background -->
+<div class="aura-background-component fixed top-0 w-full h-screen -z-10" data-alpha-mask="80" style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent)"><div class="aura-background-component top-0 w-full -z-10 absolute h-full">
+  <div data-us-project="ZHhDKfVqqu8PKOSMwfuA" class="absolute w-full h-full left-0 top-0 -z-10"></div>
+  <script type="text/javascript" defer="">
+    !function(){if(!window.UnicornStudio){window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js",i.onload=function(){window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)},(document.head || document.body).appendChild(i)}}();
+  </script>
+</div></div>
+
+<!-- Aura Background Static Fallback -->
+<div class="fixed inset-0 -z-10 w-full h-full pointer-events-none" style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent)">
+  <div class="absolute w-full h-full left-0 top-0 -z-10" style="background: radial-gradient(circle at 50% 50%, #1a1500 0%, #050505 60%); opacity: 0.6;"></div>
+</div>
+
+<!-- Canvas Smoke -->
+<canvas id="smokeCanvas" class="fixed inset-0 pointer-events-none z-0 mix-blend-screen" width="393" height="743"></canvas>
+<!-- Noise -->
+<div class="noise-overlay"></div>
+<!-- Gold Frame -->
+<div class="fixed inset-2 md:inset-6 border border-[#D4AF37]/30 pointer-events-none z-40 hidden md:block box-border"></div>
+
+<!-- Mobile Modal -->
+<div id="image-modal" class="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md hidden items-center justify-center p-6 opacity-0 transition-opacity duration-300">
+    <div class="relative max-h-[70vh] max-w-[90vw]">
+        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" alt="Zoomed view" class="w-full h-full object-contain border-[#D4AF37] border shadow-[0_0_30px_rgba(212,175,55,0.2)]" id="modal-img" decoding="async">
+        <button id="close-modal" class="absolute -top-12 right-0 text-[#D4AF37] p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
+    </div>
+</div>
+
+<!-- Header / Logo Area -->
+<header class="fixed top-0 left-0 w-full h-20 z-40 flex items-center justify-center pointer-events-none">
+    <a href="index.html" class="pointer-events-auto">
+        <h1 class="uppercase text-2xl font-light text-[#D4AF37] tracking-widest font-[Playfair_Display] mix-blend-difference">Gulum </h1>
+    </a>
+</header>
+
+<!-- Navigation -->
+<nav class="fixed right-0 top-0 h-screen w-24 bg-[#0a0a05] border-l border-[#D4AF37]/20 z-50 flex flex-col justify-between items-center py-10 transition-transform duration-700 translate-x-full md:translate-x-0" id="side-nav">
+    <button class="absolute top-6 right-[35px] text-[#D4AF37] md:hidden" id="nav-close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+    </button>
+    <div class="h-1/3 flex items-start pt-6">
+        <a href="index.html" class="vertical-text text-[10px] uppercase tracking-[0.3em] text-[#D4AF37] font-[Playfair_Display] cursor-pointer hover:text-[#F3E5AB] transition-colors">Back to Main</a>
+    </div>
+    <div class="flex flex-col gap-6 items-center">
+        <a href="#evening" class="nav-dot w-2 h-2 rounded-full border border-[#D4AF37]/60 hover:bg-[#D4AF37] transition-all duration-300"></a>
+        <a href="#blouses" class="nav-dot w-2 h-2 rounded-full border border-[#D4AF37]/60 hover:bg-[#D4AF37] transition-all duration-300"></a>
+        <a href="#cocktail" class="nav-dot w-2 h-2 rounded-full border border-[#D4AF37]/60 hover:bg-[#D4AF37] transition-all duration-300"></a>
+        <a href="#casual" class="nav-dot w-2 h-2 rounded-full border border-[#D4AF37]/60 hover:bg-[#D4AF37] transition-all duration-300"></a>
+    </div>
+    <div class="h-1/3 flex items-end pb-6">
+         <span class="text-base text-[#D4AF37] font-[Playfair_Display]">GULUM</span>
+    </div>
+</nav>
+
+<!-- Mobile Toggle -->
+<div class="fixed top-6 right-6 z-50 md:hidden">
+    <button id="mobile-toggle" class="text-[#D4AF37] p-2 border border-[#D4AF37]/40 bg-black/80 backdrop-blur transition-opacity duration-300">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M4 5h16"></path><path d="M4 12h16"></path><path d="M4 19h16"></path></svg>
+    </button>
+</div>
+
+<main class="z-10 md:pr-24 w-full pt-32 pb-20 relative">
+
+    <!-- Page Title -->
+    <section class="px-6 mb-24 max-w-7xl mx-auto text-center fade-in-section visible">
+        <span class="text-[#D4AF37] uppercase text-xs tracking-[0.4em] mb-4 block">Наши работы</span>
+        <h2 class="text-5xl md:text-7xl font-[Playfair_Display] text-[#F3E5AB] font-light">Коллекции <span class="text-[#D4AF37] font-light">Gulum</span></h2>
+        <p class="leading-relaxed text-sm text-[#E0CFA0] text-center opacity-80 max-w-xl mt-6">
+            Избранные модели, созданные на нашем производстве. Каждая деталь — результат точных технологий и мастерства.
+        </p>
+    </section>
+
+    <!-- Category 1: Evening Dresses -->
+    <section class="fade-in-section scroll-mt-24 mb-32 pr-6 pl-6 visible" id="evening">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="flex items-end justify-between mb-2">
+                <h3 class="md:text-5xl text-4xl font-light text-[#F3E5AB] font-[Playfair_Display]">Платья</h3>
+                <span class="text-[#D4AF37] text-xs hidden md:block">01 / COLLECTION</span>
             </div>
+            <div class="w-full h-[1px] bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37]/60 to-[#D4AF37]/0 mb-12"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+                <!-- Carousel 1 -->
+                <div class="space-y-4">
+                    <p class="text-xs text-[#D4AF37] uppercase tracking-widest pl-1">Black Tie</p>
+                    <div class="gallery-scroll overflow-x-auto flex gap-4 snap-x snap-mandatory hide-scrollbar pb-4" style="scroll-behavior: smooth;">
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/dfec14c3-819b-4d92-88dc-e7e54f44db4e_800w.webp" class="img-gold-filter w-full h-full object-cover" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4a83465a-34f4-4a5d-a1c4-441e13ba3f0b_800w.webp" class="w-full h-full object-cover img-gold-filter" loading="lazy" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+                <!-- Carousel 2 -->
+                <div class="space-y-4">
+                    <p class="text-xs text-[#D4AF37] uppercase tracking-widest pl-1">Maxi Silk</p>
+                    <div class="gallery-scroll overflow-x-auto flex gap-4 snap-x snap-mandatory hide-scrollbar pb-4" style="scroll-behavior: smooth;">
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/35721fd2-6308-4e4f-a9da-caca4c4e080b_800w.webp" class="w-full h-full object-cover img-gold-filter" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/cea71543-b277-4354-b44d-e0b33aa6333b_800w.webp" class="w-full h-full object-cover img-gold-filter" loading="lazy" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+                <!-- Carousel 3 -->
+                <div class="space-y-4">
+                    <p class="text-xs text-[#D4AF37] uppercase tracking-widest pl-1">Velvet Series</p>
+                    <div class="gallery-scroll overflow-x-auto flex gap-4 snap-x snap-mandatory hide-scrollbar pb-4" style="scroll-behavior: smooth;">
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4a83465a-34f4-4a5d-a1c4-441e13ba3f0b_800w.webp" class="w-full h-full object-cover img-gold-filter" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-            <!-- Gallery Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Gallery Item 1 -->
+    <!-- Category 2: Blouses -->
+    <section id="blouses" class="mb-32 px-6 fade-in-section scroll-mt-24 visible">
+        <div class="max-w-[1400px] mr-auto ml-auto">
+            <div class="flex mb-2 items-end justify-between">
+                <h3 class="md:text-5xl text-4xl font-light text-[#F3E5AB] font-[Playfair_Display]">Блузки</h3>
+                <span class="text-[#D4AF37] text-xs hidden md:block">02 / COLLECTION</span>
+            </div>
+            <div class="w-full h-[1px] bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37]/60 to-[#D4AF37]/0 mb-12"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+                <div class="space-y-4">
+                    <p class="text-xs text-[#D4AF37] uppercase tracking-widest pl-1">Office Chic</p>
+                    <div class="gallery-scroll overflow-x-auto flex gap-4 snap-x snap-mandatory hide-scrollbar pb-4">
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/257fd22c-cecb-4728-9f75-641647e5390b_800w.webp" class="w-full h-full object-cover img-gold-filter" loading="lazy" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <p class="text-xs text-[#D4AF37] uppercase tracking-widest pl-1">Romantic</p>
+                    <div class="gallery-scroll overflow-x-auto flex gap-4 snap-x snap-mandatory hide-scrollbar pb-4">
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c83a78dd-55c8-43e8-a693-3a5ade759275_800w.webp" class="w-full h-full object-cover img-gold-filter" loading="lazy" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <p class="text-xs text-[#D4AF37] uppercase tracking-widest pl-1">Minimalism</p>
+                    <div class="gallery-scroll overflow-x-auto flex gap-4 snap-x snap-mandatory hide-scrollbar pb-4">
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/1a855500-0d10-4a92-8a4a-516694bc12ae_800w.webp" class="img-gold-filter w-full h-full object-cover" loading="lazy" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category 3: Cocktail -->
+    <section id="cocktail" class="mb-32 px-6 fade-in-section scroll-mt-24 visible">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="flex items-end justify-between mb-2">
+                <h3 class="md:text-5xl text-4xl font-light text-[#F3E5AB] font-[Playfair_Display]">Шорты/штаны</h3>
+                <span class="text-[#D4AF37] text-xs hidden md:block">03 / COLLECTION</span>
+            </div>
+            <div class="w-full h-[1px] bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37]/60 to-[#D4AF37]/0 mb-12"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+                <div class="space-y-4">
+                    <p class="text-xs text-[#D4AF37] uppercase tracking-widest pl-1">Summer Party</p>
+                    <div class="gallery-scroll overflow-x-auto flex gap-4 snap-x snap-mandatory hide-scrollbar pb-4">
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5b332157-de6c-497d-bc75-73d5edeba41d_800w.webp" class="img-gold-filter w-full h-full object-cover" loading="lazy" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                         <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/d64f753a-6905-49e3-9e4b-e98ae16b3219_1600w.webp" class="w-full h-full object-cover img-gold-filter" loading="lazy" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <p class="text-xs text-[#D4AF37] uppercase tracking-widest pl-1">Night Out</p>
+                    <div class="gallery-scroll overflow-x-auto flex gap-4 snap-x snap-mandatory hide-scrollbar pb-4">
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/cea71543-b277-4354-b44d-e0b33aa6333b_800w.webp" class="w-full h-full object-cover img-gold-filter" loading="lazy" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+                 <div class="space-y-4">
+                    <p class="text-xs text-[#D4AF37] uppercase tracking-widest pl-1">Sequins</p>
+                    <div class="gallery-scroll overflow-x-auto flex gap-4 snap-x snap-mandatory hide-scrollbar pb-4">
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/d64f753a-6905-49e3-9e4b-e98ae16b3219_800w.webp" class="w-full h-full object-cover img-gold-filter" loading="lazy" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category 4: Casual Chic -->
+    <section id="casual" class="mb-24 px-6 fade-in-section scroll-mt-24 visible">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="flex items-end justify-between mb-2">
+                <h3 class="md:text-5xl text-4xl font-light text-[#F3E5AB] font-[Playfair_Display]">Casual Chic</h3>
+                <span class="text-[#D4AF37] text-xs hidden md:block">04 / COLLECTION</span>
+            </div>
+            <div class="w-full h-[1px] bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37]/60 to-[#D4AF37]/0 mb-12"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+                <div class="space-y-4">
+                    <p class="text-xs text-[#D4AF37] uppercase tracking-widest pl-1">Everyday Silk</p>
+                    <div class="gallery-scroll overflow-x-auto flex gap-4 snap-x snap-mandatory hide-scrollbar pb-4">
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5b332157-de6c-497d-bc75-73d5edeba41d_800w.webp" class="w-full h-full object-cover img-gold-filter" loading="lazy" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <p class="text-xs text-[#D4AF37] uppercase tracking-widest pl-1">Knitwear</p>
+                    <div class="gallery-scroll overflow-x-auto flex gap-4 snap-x snap-mandatory hide-scrollbar pb-4">
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/e2dd6b51-e63d-4de5-b2b0-695b700ba3dc_800w.png" class="w-full h-full object-cover img-gold-filter" loading="lazy" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <p class="text-xs text-[#D4AF37] uppercase tracking-widest pl-1">Weekend</p>
+                    <div class="gallery-scroll overflow-x-auto flex gap-4 snap-x snap-mandatory hide-scrollbar pb-4">
+                        <div class="min-w-[85%] md:min-w-full h-[450px] md:h-[500px] snap-center relative cursor-pointer img-container group overflow-hidden border border-[#D4AF37]/10 bg-[#0a0a05]">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/2e157af2-5d07-402f-8e82-6705dd2e2d89_800w.webp" class="w-full h-full object-cover img-gold-filter" loading="lazy" decoding="async" onclick="openModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Full Collection Button -->
+    <div class="w-full flex justify-center pb-20 fade-in-section visible">
+        <a href="https://wa.me/996558780118?text=Здравствуйте,%20отправьте%20пожалуйста%20всю%20коллекцию%20одежды" target="_blank" class="inline-block border border-[#D4AF37]/50 px-12 py-4 text-[#D4AF37] text-sm uppercase tracking-[0.3em] hover:bg-[#D4AF37] hover:text-black transition-all duration-500 hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+            Вся коллекция
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center bg-black z-20 border-[#D4AF37]/20 border-t pt-12 pb-12 relative">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col items-center">
+            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/9af6e189-ba51-4848-b550-23b94e051169_320w.png" alt="Gulum Logo" class="w-24 h-24 object-cover border-[#D4AF37]/40 border mb-6 shadow-[0_0_15px_rgba(212,175,55,0.2)]" loading="lazy" decoding="async" style="border-radius: 20px">
+            <p class="font-sans text-[#D4AF37]/30 text-[10px] tracking-widest uppercase">
+                © 2024 Gulum Factory. All Rights Reserved.
+            </p>
+        </div>
+    </footer>
+
+</main>
+
+<script>
+    // Preloader Animation Logic
+    window.addEventListener('load', () => {
+        // Unlock scroll logic handled by css overflow-hidden on body (removed via script or css)
+        // Wait briefly for smooth visual
+        setTimeout(() => {
+            document.body.classList.add('loaded');
+            document.body.classList.remove('overflow-hidden');
+            
+            // Allow transition to finish before showing real header text
+            setTimeout(() => {
+                document.body.classList.add('loaded-complete');
+            }, 1200); // 1.2s matches CSS transition time
+        }, 500);
+    });
+
+    // Initialize Icons
+    lucide.createIcons();
+
+    // Scroll Observer (Fade In)
+    const observerOptions = { threshold: 0.1 };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+    document.querySelectorAll('.fade-in-section').forEach(el => observer.observe(el));
+
+    // Nav Logic
+    const sideNav = document.getElementById('side-nav');
+    const mobileToggle = document.getElementById('mobile-toggle');
+    const navClose = document.getElementById('nav-close');
+
+    function toggleMenu() {
+        sideNav.classList.toggle('translate-x-full');
+        // Hide/Show Hamburger
+        if (!sideNav.classList.contains('translate-x-full')) {
+             if (window.innerWidth < 768) mobileToggle.style.opacity = '0';
+        } else {
+             mobileToggle.style.opacity = '1';
+        }
+    }
+    mobileToggle.addEventListener('click', toggleMenu);
+    navClose.addEventListener('click', toggleMenu);
+
+    // Modal Logic (Mobile Only Zoom)
+    const modal = document.getElementById('image-modal');
+    const modalImg = document.getElementById('modal-img');
+    const closeModal = document.getElementById('close-modal');
+
+    window.openModal = function(src) {
+        if (window.innerWidth < 768) {
+            modalImg.src = src;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+            }, 10);
+        }
+    };
+
+    closeModal.addEventListener('click', () => {
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }, 300);
+    });
+
+    modal.addEventListener('click', (e) => {
+        if(e.target === modal) closeModal.click();
+    });
+
+    // Smoke Effect
+    const canvas = document.getElementById('smokeCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.vx = (Math.random() - 0.5) * 1.5;
+            this.vy = (Math.random() - 0.5) * 1.5 - 1; 
+            this.life = 1;
+            this.decay = Math.random() * 0.015 + 0.005;
+            this.size = Math.random() * 40 + 20;
+            this.hue = 30 + Math.random() * 30; // Gold Hue
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.life -= this.decay;
+            this.size += 0.3;
+        }
+        draw(ctx) {
+            const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+            gradient.addColorStop(0, `hsla(${this.hue}, 80%, 60%, ${this.life * 0.15})`);
+            gradient.addColorStop(1, `hsla(${this.hue}, 80%, 60%, 0)`);
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        if (Math.random() > 0.9) particles.push(new Particle(Math.random() * width, height + 20));
+        
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].update();
+            particles[i].draw(ctx);
+            if (particles[i].life <= 0) {
+                particles.splice(i, 1);
+                i--;
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+</script>
+
+</body></html>
