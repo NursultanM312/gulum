@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Галерея | GULUM</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #050505;
+            color: #F3E5AB;
+            overflow-x: hidden;
+        }
+        /* Gold scrollbar */
+        ::-webkit-scrollbar { width: 4px; background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #D4AF37; }
+        
+        /* Gallery hover effects */
+        .gallery-item {
+            overflow: hidden;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            transition: all 0.5s ease;
+        }
+        .gallery-item:hover {
+            border-color: #D4AF37;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+        .gallery-item img {
+            transition: transform 0.7s ease;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Geist:wght@300;400;500&display=swap">
+</head>
+<body class="antialiased min-h-screen relative">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-[#D4AF37]/20">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="/" class="font-serif text-2xl text-[#D4AF37] tracking-wide">GULUM</a>
+            <a href="/" class="text-[#D4AF37] text-sm uppercase tracking-widest hover:text-[#F3E5AB] transition-colors">← Назад</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Title -->
+            <div class="text-center mb-16">
+                <h1 class="font-serif text-5xl md:text-7xl mb-4 text-[#F3E5AB]">
+                    <span class="italic text-[#D4AF37]">Галерея</span> Работ
+                </h1>
+                <p class="text-[#D4AF37]/60 text-sm uppercase tracking-widest">Наши лучшие проекты</p>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Gallery Item 1 -->
